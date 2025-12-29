@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import { Admin } from "../models/Admin.js";
+import { Admin } from "../models/Admin";
 import type { Request, Response } from "express";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/tocken.js";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/tocken";
 
 interface AdminRequestBody {
   name: string;

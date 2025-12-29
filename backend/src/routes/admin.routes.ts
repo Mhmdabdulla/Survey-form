@@ -3,7 +3,7 @@ import {
   adminLogin,
   createAdmin,
   refreshAccessToken
-} from "../controllers/admin.controller.js";
+} from "../controllers/admin.controller";
 
 
 const router = Router();

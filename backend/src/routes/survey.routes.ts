@@ -1,16 +1,16 @@
-// import { Router } from "express";
-// import {
-//   submitSurvey,
-//   getAllSurveys
-// } from "../controllers/survey.controller.js";
-// import { adminAuth } from "../middleware/auth.middleware";
+import { Router } from "express";
+import {
+  submitSurvey,
+  getAllSurveys
+} from "../controllers/survey.controller";
+import { adminAuth } from "../middleware/auth.middleware";
 
-// const router = Router();
+const router = Router();
 
-// // Public – submit survey
-// router.post("/", submitSurvey);
 
-// // Admin – get all surveys
-// router.get("/", adminAuth, getAllSurveys);
+router.post("/", submitSurvey);
 
-// export default router;
+
+router.get("/", adminAuth, getAllSurveys);
+
+export default router;

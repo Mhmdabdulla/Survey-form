@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
-import { STATUS_CODES } from "../utils/constants.js";
+import { STATUS_CODES } from "../utils/constants";
 
 
 export const adminAuth = (
