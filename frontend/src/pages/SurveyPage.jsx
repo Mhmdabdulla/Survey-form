@@ -3,7 +3,7 @@ import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { useToast } from '../context/ToastContext';
-import { saveSubmission } from '../utils/storage';
+import { submitSurvey } from '../services/survey.service';
 
 const SurveyPage = () => {
     const { addToast } = useToast();
@@ -22,14 +22,34 @@ const SurveyPage = () => {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = 'Name is required';
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
+        if (!formData.name.trim()) {
+          newErrors.name = "Name is required";
+        } else if (formData.name.length < 2) {
+          newErrors.name = "Name must be at least 2 characters";
+        } else if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+          newErrors.name = "Name can contain only letters";
         }
+
+        const email = formData.email.toLowerCase();
+
+        if (!email) {
+          newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          newErrors.email = "Invalid email format";
+        }
+
         if (!formData.gender) newErrors.gender = 'Gender is required';
-        if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+        if (!formData.phone.trim()) {
+          newErrors.phone = "Phone number is required";
+        } else if (!/^\d{10,15}$/.test(formData.phone.replace(/\s+/g, ""))) {
+          newErrors.phone = "Invalid phone number";
+        }
+
+        if (formData.message && formData.message.length > 500) {
+          newErrors.message = "Message cannot exceed 500 characters";
+        }
+
+
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -43,46 +63,47 @@ const SurveyPage = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
 
-        // Anti-spam check
-        if (formData.honeypot) {
-            console.log("Spam detected");
-            return;
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (!validate()) {
-            addToast('Please fix the errors in the form', 'error');
-            return;
-        }
+    // Honeypot anti-spam
+    if (formData.honeypot) return;
 
-        setIsSubmitting(true);
+    if (!validate()) {
+      addToast('Please fix the errors in the form', 'error');
+      return;
+    }
 
-        try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSubmitting(true);
 
-            const { honeypot, ...submissionData } = formData;
-            saveSubmission(submissionData);
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const { honeypot, ...payload } = formData;
 
-            addToast('Survey submitted successfully!', 'success');
-            setFormData({
-                name: '',
-                gender: '',
-                nationality: '',
-                email: '',
-                phone: '',
-                address: '',
-                message: '',
-                honeypot: ''
-            });
-        } catch (err) {
-            addToast('Failed to submit survey. Please try again.', 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+      await submitSurvey(payload);
+
+      addToast('Survey submitted successfully!', 'success');
+
+      setFormData({
+        name: '',
+        gender: '',
+        nationality: '',
+        email: '',
+        phone: '',
+        address: '',
+        message: '',
+        honeypot: ''
+      });
+    } catch (error) {
+      addToast(
+        error?.response?.data?.message || 'Failed to submit survey',
+        'error'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
     return (
         <div className="flex justify-center">
