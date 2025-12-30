@@ -1,16 +1,16 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
+// import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    // const { user, logout } = useAuth();
+    // const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/admin/login');
-    };
+    // const handleLogout = () => {
+    //     logout();
+    //     navigate('/admin/login');
+    // };
 
     const navStyle = {
         backgroundColor: 'var(--surface)',
@@ -27,7 +27,7 @@ const Navbar = () => {
                 </Link>
                 <div className="flex items-center gap-4">
                     <Link to="/" style={{ fontWeight: 500 }}>Survey</Link>
-                    {user ? (
+                    {/* {user ? (
                         <>
                             <Link to="/admin/dashboard" style={{ fontWeight: 500 }}>Dashboard</Link>
                             <Button variant="ghost" onClick={handleLogout} className="text-sm">Logout</Button>
@@ -36,7 +36,10 @@ const Navbar = () => {
                         <Link to="/admin/login">
                             <Button variant="ghost" className="text-sm">Admin Login</Button>
                         </Link>
-                    )}
+                    )} */}
+                    <Link to="/admin/login">
+                            <Button variant="ghost" className="text-sm">Admin Login</Button>
+                        </Link>
                 </div>
             </div>
         </nav>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+// import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import Layout from './components/layout/Layout';
 import SurveyPage from './pages/SurveyPage';
@@ -9,7 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
-    <AuthProvider>
+    // <AuthProvider>
       <ToastProvider>
         <Layout>
           <Routes>
@@ -21,7 +21,7 @@ function App() {
           </Routes>
         </Layout>
       </ToastProvider>
-    </AuthProvider>
+    // </AuthProvider>
   );
 }
 
