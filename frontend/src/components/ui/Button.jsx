@@ -1,5 +1,4 @@
 import React from 'react';
-import '../../index.css';
 
 const Button = ({
     children,
@@ -10,56 +9,21 @@ const Button = ({
     onClick,
     ...props
 }) => {
-    const baseStyle = {
-        padding: '0.75rem 1.5rem',
-        borderRadius: 'var(--radius-md)',
-        fontWeight: 600,
-        border: 'none',
-        transition: 'background-color 0.2s, transform 0.1s',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: disabled ? 0.6 : 1,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-    };
+    const baseStyles = "inline-flex items-center justify-center px-6 py-2.5 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed";
 
     const variants = {
-        primary: {
-            backgroundColor: 'var(--primary)',
-            color: '#fff',
-        },
-        secondary: {
-            backgroundColor: 'var(--secondary)',
-            color: '#fff',
-        },
-        ghost: {
-            backgroundColor: 'transparent',
-            color: 'var(--primary)',
-            border: '1px solid var(--primary)',
-        },
-        danger: {
-            backgroundColor: 'var(--error)',
-            color: '#fff',
-        }
+        primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm hover:shadow",
+        secondary: "bg-teal-500 text-white hover:bg-teal-600 focus:ring-teal-500 shadow-sm hover:shadow",
+        ghost: "bg-transparent text-indigo-600 border border-indigo-600 hover:bg-indigo-50 focus:ring-indigo-500",
+        danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow"
     };
-
-    const style = { ...baseStyle, ...variants[variant] };
 
     return (
         <button
             type={type}
-            style={style}
-            className={className}
+            className={`${baseStyles} ${variants[variant] || variants.primary} ${className}`}
             disabled={disabled}
             onClick={onClick}
-            onMouseOver={(e) => {
-                if (!disabled && variant !== 'ghost') {
-                    e.currentTarget.style.filter = 'brightness(90%)';
-                }
-            }}
-            onMouseOut={(e) => {
-                e.currentTarget.style.filter = 'none';
-            }}
             {...props}
         >
             {children}

@@ -1,46 +1,28 @@
 import React from 'react';
 
 const Input = ({ label, id, error, className = '', ...props }) => {
-    const containerStyle = {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        marginBottom: '1rem',
-        width: '100%',
-    };
-
-    const labelStyle = {
-        fontSize: '0.875rem',
-        fontWeight: 500,
-        color: 'var(--text-main)',
-    };
-
-    const inputStyle = {
-        padding: '0.75rem',
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid ${error ? 'var(--error)' : 'var(--border)'}`,
-        fontSize: '1rem',
-        outline: 'none',
-        transition: 'border-color 0.2s, box-shadow 0.2s',
-    };
-
     return (
-        <div style={containerStyle} className={className}>
-            {label && <label htmlFor={id} style={labelStyle}>{label}</label>}
+        <div className={`flex flex-col gap-1.5 mb-4 w-full ${className}`}>
+            {label && (
+                <label
+                    htmlFor={id}
+                    className="text-sm font-medium text-gray-700"
+                >
+                    {label}
+                </label>
+            )}
             <input
                 id={id}
-                style={inputStyle}
-                onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--primary)';
-                    e.target.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.2)';
-                }}
-                onBlur={(e) => {
-                    e.target.style.borderColor = error ? 'var(--error)' : 'var(--border)';
-                    e.target.style.boxShadow = 'none';
-                }}
+                className={`
+                    w-full px-3 py-2.5 rounded-lg border text-sm transition-all duration-200 outline-none
+                    ${error
+                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-red-50/30'
+                        : 'border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-white'
+                    }
+                `}
                 {...props}
             />
-            {error && <span style={{ color: 'var(--error)', fontSize: '0.75rem' }}>{error}</span>}
+            {error && <span className="text-xs text-red-500 font-medium mt-0.5">{error}</span>}
         </div>
     );
 };
