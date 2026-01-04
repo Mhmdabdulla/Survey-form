@@ -1,16 +1,11 @@
 import React from 'react';
 
-const Card = ({ children, className = '', style = {} }) => {
-    const cardStyle = {
-        backgroundColor: 'var(--surface)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-md)',
-        padding: '2rem',
-        ...style,
-    };
-
+const Card = ({ children, className = '', ...props }) => {
     return (
-        <div className={className} style={cardStyle}>
+        <div
+            className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${className}`}
+            {...props}
+        >
             {children}
         </div>
     );

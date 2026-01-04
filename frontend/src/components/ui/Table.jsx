@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const Table = ({ columns, data, sortable = false }) => {
     const [sortConfig, setSortConfig] = useState(null);
@@ -24,55 +25,33 @@ const Table = ({ columns, data, sortable = false }) => {
         setSortConfig({ key, direction });
     };
 
-    const tableStyle = {
-        width: '100%',
-        borderCollapse: 'collapse',
-        marginTop: '1rem',
-        borderRadius: 'var(--radius-md)',
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-sm)',
-    };
-
-    const thStyle = {
-        textAlign: 'left',
-        padding: '1rem',
-        backgroundColor: '#f3f4f6',
-        fontWeight: 600,
-        fontSize: '0.875rem',
-        color: 'var(--text-secondary)',
-        cursor: sortable ? 'pointer' : 'default',
-        borderBottom: '1px solid var(--border)',
-    };
-
-    const tdStyle = {
-        padding: '1rem',
-        borderBottom: '1px solid var(--border)',
-        color: 'var(--text-main)',
-        fontSize: '0.9rem',
-    };
-
     return (
-        <div style={{ overflowX: 'auto' }}>
-            <table style={tableStyle}>
-                <thead>
+        <div className="w-full overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+            <table className="w-full text-left bg-white text-sm text-gray-500">
+                <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold border-b border-gray-100">
                     <tr>
                         {columns.map((col) => (
                             <th
                                 key={col.key}
-                                style={thStyle}
+                                className={`px-6 py-4 whitespace-nowrap ${sortable ? 'cursor-pointer hover:bg-gray-100 transition-colors' : ''}`}
                                 onClick={() => sortable && requestSort(col.key)}
                             >
-                                {col.label} {sortConfig && sortConfig.key === col.key ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
+                                <div className="flex items-center gap-1">
+                                    {col.label}
+                                    {sortConfig && sortConfig.key === col.key && (
+                                        sortConfig.direction === 'ascending' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                                    )}
+                                </div>
                             </th>
                         ))}
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100">
                     {sortedData.length > 0 ? (
                         sortedData.map((row, idx) => (
-                            <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#f9fafb' }}>
+                            <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                                 {columns.map((col) => (
-                                    <td key={col.key} style={tdStyle}>
+                                    <td key={col.key} className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
                                         {col.render ? col.render(row[col.key], row) : row[col.key]}
                                     </td>
                                 ))}
@@ -80,7 +59,7 @@ const Table = ({ columns, data, sortable = false }) => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={columns.length} style={{ ...tdStyle, textAlign: 'center', padding: '2rem' }}>
+                            <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-400">
                                 No data available
                             </td>
                         </tr>
