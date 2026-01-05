@@ -3,7 +3,7 @@ import {
   submitSurvey,
   getAllSurveys
 } from "../controllers/survey.controller";
-// import { adminAuth } from "../middleware/auth.middleware";
+import { adminAuth } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -11,7 +11,6 @@ const router = Router();
 router.post("/", submitSurvey);
 
 
-// router.get("/", adminAuth, getAllSurveys);
-router.get("/", getAllSurveys);
+router.get("/", adminAuth, getAllSurveys);
 
 export default router;
