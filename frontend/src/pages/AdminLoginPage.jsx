@@ -4,6 +4,7 @@ import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext'; 
 import { adminLogin } from '../services/admin.service';
 import { ShieldCheck, Lock } from 'lucide-react';
 
@@ -11,11 +12,14 @@ const AdminLoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    
     const { addToast } = useToast();
+    const { login } = useAuth(); 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (!email || !password) {
             addToast('Please enter both email and password', 'error');
             return;
@@ -23,12 +27,21 @@ const AdminLoginPage = () => {
 
         setIsLoggingIn(true);
         try {
-            await adminLogin(email, password);
+  
+            const data = await adminLogin(email, password);
+            
+            login(data.token, data.admin); 
+
             addToast('Welcome back, Admin!', 'success');
+            
+
             navigate('/admin/dashboard');
-            // eslint-disable-next-line no-unused-vars
+            
+
         } catch (err) {
-            addToast('Invalid credentials. ', 'error');
+
+            addToast(err.message, 'error'); 
+        console.log("Toast shown with message:", err.message);
         } finally {
             setIsLoggingIn(false);
         }
@@ -52,25 +65,23 @@ const AdminLoginPage = () => {
                 <Card className="mt-8 bg-white py-8 px-4 shadow-xl border-0 sm:rounded-2xl sm:px-10">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <Input
-                            label="Username / Email"
+                            label="Username"
                             type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@example.com"
+                            placeholder="John"
                             autoComplete="username"
                             className="bg-gray-50"
                         />
 
-                        <div className="relative">
-                            <Input
-                                label="Password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                autoComplete="current-password"
-                            />
-                        </div>
+                        <Input
+                            label="Password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            autoComplete="current-password"
+                        />
 
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
@@ -86,34 +97,32 @@ const AdminLoginPage = () => {
                             </div>
 
                             <div className="text-sm">
-                                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                                <span className="font-medium text-indigo-600 hover:text-indigo-500 cursor-not-allowed opacity-50">
                                     Forgot password?
-                                </a>
+                                </span>
                             </div>
                         </div>
 
-                        <div>
-                            <Button
-                                type="submit"
-                                className="w-full flex justify-center py-3 text-sm"
-                                disabled={isLoggingIn}
-                            >
-                                {isLoggingIn ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Authorizing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Lock className="w-4 h-4 mr-2" />
-                                        Secure Login
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full flex justify-center py-3 text-sm"
+                            disabled={isLoggingIn}
+                        >
+                            {isLoggingIn ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Authorizing...
+                                </>
+                            ) : (
+                                <>
+                                    <Lock className="w-4 h-4 mr-2" />
+                                    Secure Login
+                                </>
+                            )}
+                        </Button>
                     </form>
                 </Card>
 

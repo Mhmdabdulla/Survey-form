@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Admin } from "../models/Admin";
 import type { Request, Response } from "express";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/tocken";
+import {  generateToken, } from "../utils/tocken";
 
 interface AdminRequestBody {
   name: string;
@@ -30,20 +30,21 @@ export const createAdmin = async (req: Request<{}, {}, AdminRequestBody>, res: R
       password: hashedPassword
     });
 
-    const refreshToken = generateRefreshToken({
+    const token = generateToken({
       id: admin._id.toString(),
       name: admin.name
     });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000
+    // });
 
     return res.status(201).json({
       message: "Admin created successfully",
+      token: token,
       admin: {
         id: admin._id,
         name: admin.name
@@ -73,20 +74,14 @@ export const adminLogin = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const refreshToken = generateRefreshToken({
+    const token = generateToken({
       id: admin._id.toString(),
       name: admin.name
     });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-
     return res.status(200).json({
       message: "Login successful",
+      token,
       admin: {
         id: admin._id,
         name: admin.name
@@ -97,31 +92,31 @@ export const adminLogin = async (req: Request, res: Response) => {
   }
 };
 
-export const refreshAccessToken = async (req: Request, res: Response) => {
-  try {
-    const refreshToken = req.cookies?.refreshToken;
+// export const refreshAccessToken = async (req: Request, res: Response) => {
+//   try {
+//     const token = req.cookies?.token;
 
-    if (!refreshToken) {
-      return res.status(401).json({ message: "Refresh token missing" });
-    }
+//     if (!token) {
+//       return res.status(401).json({ message: "Refresh token missing" });
+//     }
 
-    const decoded = verifyRefreshToken(refreshToken);
+//     const decoded = verifytoken(token);
 
-    const admin = await Admin.findById(decoded.id).select("-password");
-    if (!admin) {
-      return res.status(401).json({ message: "Admin not found" });
-    }
+//     const admin = await Admin.findById(decoded.id).select("-password");
+//     if (!admin) {
+//       return res.status(401).json({ message: "Admin not found" });
+//     }
 
-    const accessToken = generateAccessToken({
-      id: admin._id.toString(),
-      name: admin.name
-    });
+//     const accessToken = generateAccessToken({
+//       id: admin._id.toString(),
+//       name: admin.name
+//     });
 
-    return res.status(200).json({
-      accessToken,
-      user: admin
-    });
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid refresh token" });
-  }
-};
+//     return res.status(200).json({
+//       accessToken,
+//       user: admin
+//     });
+//   } catch (error) {
+//     return res.status(401).json({ message: "Invalid refresh token" });
+//   }
+// };

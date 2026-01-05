@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   adminLogin,
   createAdmin,
-  refreshAccessToken
 } from "../controllers/admin.controller";
 
 
@@ -13,6 +12,6 @@ router.post("/login", adminLogin);
 
 // Create admin
 router.post("/create",  createAdmin);
-router.post("/refresh", refreshAccessToken);
+// router.post("/refresh", refreshAccessToken);
 
 export default router;

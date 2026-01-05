@@ -1,45 +1,64 @@
-// import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
-// const AuthContext = createContext();
+const AuthContext = createContext();
 
-// export const useAuth = () => useContext(AuthContext);
+export const AuthProvider = ({ children }) => {
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-// export const AuthProvider = ({ children }) => {
-//     const [user, setUser] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     // Ideally navigate should be used in components, but here we might need it for auto-redirect or similar logic if we wrap App.
-//     // Actually, we can't use useNavigate here if AuthProvider is outside Router.
-//     // We'll assume AuthProvider is inside Router.
 
-//     useEffect(() => {
-//         const token = localStorage.getItem('token');
-//         if (token) {
-//             // Validate token (mock)
-//             setUser({ email: 'admin@example.com' });
-//         }
-//         setLoading(false);
-//     }, []);
+  useEffect(() => {
+    const initializeAuth = () => {
+      try {
+        const savedAdmin = localStorage.getItem('adminData');
+        const token = localStorage.getItem('adminToken');
 
-//     const login = async (email, password) => {
-//         // Mock API call
-//         if (email === 'admin@example.com' && password === 'password') {
-//             const token = 'mock-jwt-token-' + Date.now();
-//             localStorage.setItem('token', token);
-//             setUser({ email });
-//             return true;
-//         }
-//         throw new Error('Invalid credentials');
-//     };
+        if (savedAdmin && token) {
+          setAdmin(JSON.parse(savedAdmin));
+        }
+      } catch (error) {
+        console.error("Failed to parse auth data", error);
+        localStorage.clear();
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//     const logout = () => {
-//         localStorage.removeItem('token');
-//         setUser(null);
-//     };
+    initializeAuth();
+  }, []); 
 
-//     return (
-//         <AuthContext.Provider value={{ user, login, logout, loading }}>
-//             {!loading && children}
-//         </AuthContext.Provider>
-//     );
-// };
+  const login = (token, adminData) => {
+    localStorage.setItem('adminToken', token);
+    localStorage.setItem('adminData', JSON.stringify(adminData));
+    setAdmin(adminData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
+    setAdmin(null);
+  };
+
+  const value = useMemo(() => ({
+    admin,
+    login,
+    logout,
+    isAuthenticated: !!admin,
+    loading
+  }), [admin, loading]);
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

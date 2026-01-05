@@ -1,36 +1,22 @@
-import axios from 'axios';
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import API from "../config/axios";
 
 
 
-export const adminLogin = async (
-  name, password
-) => {
+export const adminLogin = async (name, password) => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/admin/login`,
-      { name, password },
-      {
-        withCredentials: true 
-      }
-    );
-
-    return response.data;
+    const response = await API.post('/admin/login', { name, password });
+    console.log("Admin login response:", response);
+    return response.data; // Success: returns { token, admin }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.message || 'Invalid credentials'
-      );
-    }
-    throw new Error('Login failed');
+
+    console.error("Login error from service:", error);
+    const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+    throw new Error(errorMessage);
   }
 };
 
 
 export const fetchSurveys = async () => {
-  const res = await axios.get(`${API_BASE_URL}/surveys`);
-  console.log(res.data);
+  const res = await API.get('/surveys');
   return res.data;
 };
