@@ -9,23 +9,24 @@ export const adminAuth = (
   next: NextFunction
 ) => {
   try {
-    const accessToken =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.split(" ")[1];
+    const token = req.header("Authorization")?.split(" ")[1];
 
-    if (!accessToken) {
+    if (!token) {
       return res
         .status(STATUS_CODES.UNAUTHORIZED)
         .json({ error: "Unauthorized: No token provided" });
     }
 
     const decoded = jwt.verify(
-      accessToken,
-      process.env.ACCESS_TOKEN_SECRET!
-    ) as { userId: string };
+      token,
+      process.env.TOKEN_SECRET!
+    )  as {
+    id: string;
+    name: string;
+  };
 
     // Attach user info (admin)
-    req.admin = { id: decoded.userId };
+    req.admin = { id: decoded.id };
 
     next();
   } catch (error) {
