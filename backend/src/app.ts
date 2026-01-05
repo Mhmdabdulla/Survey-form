@@ -14,7 +14,7 @@ connectDB();
 
 app.use(
     cors({
-    origin: "http://localhost:5173",
+    origin:[ "http://localhost:5173","https://survey-form-vert-eight.vercel.app/"],
     credentials: true
   })
 );
