@@ -6,9 +6,33 @@ import { useToast } from '../context/ToastContext';
 import { submitSurvey } from '../services/survey.service';
 import { Send, FileText, CheckCircle } from 'lucide-react';
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+
 const SurveyPage = () => {
   const { addToast } = useToast();
-  const [formData, setFormData] = useState({
+
+  const schema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters").regex(/^[a-zA-Z\s]+$/, "Name can contain only letters"),
+    gender: z.enum(['Male', 'Female', 'Other'], { errorMap: () => ({ message: "Gender is required" }) }),
+    nationality: z.string().min(2, "Nationality must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    phone: z.string().regex(/^\d{10,15}$/, "Invalid phone number"),
+    address: z.string().max(500, "Address cannot exceed 500 characters"),
+    message: z.string().max(500, "Message cannot exceed 500 characters").optional(),
+    honeypot: z.string().optional()
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    defaultValues: {
     name: '',
     gender: '',
     nationality: '',
@@ -17,95 +41,41 @@ const SurveyPage = () => {
     address: '',
     message: '',
     honeypot: '' // Anti-spam
+  },
+    resolver: zodResolver(schema),
   });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    } else if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
-      newErrors.name = "Name can contain only letters";
-    }
-
-    const email = formData.email.toLowerCase();
-
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^\d{10,15}$/.test(formData.phone.replace(/\s+/g, ""))) {
-      newErrors.phone = "Invalid phone number";
-    }
-
-    if (formData.message && formData.message.length > 500) {
-      newErrors.message = "Message cannot exceed 500 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (formData) => {
+
 
     // Honeypot anti-spam
     if (formData.honeypot) return;
 
-    if (!validate()) {
-      addToast('Please fix the errors in the form', 'error');
-      return;
-    }
-
-    setIsSubmitting(true);
 
     try {
       // eslint-disable-next-line no-unused-vars
       const { honeypot, ...payload } = formData;
 
-      await submitSurvey(payload);
+       await submitSurvey(payload);
+      reset();
+      console.log('Submitted data:', formData);
       setIsSuccess(true);
       addToast('Survey submitted successfully!', 'success');
 
-      setFormData({
-        name: '',
-        gender: '',
-        nationality: '',
-        email: '',
-        phone: '',
-        address: '',
-        message: '',
-        honeypot: ''
-      });
       // Reset success message after 5 seconds to show form again if needed
       setTimeout(() => setIsSuccess(false), 5000);
 
     } catch (error) {
+      setError('apiError', { type: 'manual', message: error?.response?.data?.message || 'Failed to submit survey' });
       addToast(
         error?.response?.data?.message || 'Failed to submit survey',
         'error'
       );
-    } finally {
-      setIsSubmitting(false);
-    }
+    } 
   };
 
   if (isSuccess) {
@@ -142,7 +112,7 @@ const SurveyPage = () => {
 
         <Card className="shadow-2xl border-0 rounded-2xl overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-          <form onSubmit={handleSubmit} className="p-2 sm:p-4 space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-2 sm:p-4 space-y-8">
 
             {/* Personal Information Section */}
             <div className="space-y-6">
@@ -156,18 +126,17 @@ const SurveyPage = () => {
                   label="Full Name"
                   name="name"
                   id="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  error={errors.name}
                   placeholder="e.g. John Doe"
+                  {...register("name")}
+                  error={errors.name?.message}
                 />
 
                 <Input
                   label="Nationality"
                   name="nationality"
-                  value={formData.nationality}
-                  onChange={handleChange}
                   placeholder="e.g. American"
+                  {...register("nationality")}
+                  error={errors.nationality?.message}
                 />
               </div>
 
@@ -176,20 +145,18 @@ const SurveyPage = () => {
                   label="Email Address"
                   name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
                   placeholder="john@example.com"
+                  {...register("email")}
+                  error={errors.email?.message}
                 />
 
                 <Input
                   label="Phone Number"
                   name="phone"
                   type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  error={errors.phone}
                   placeholder="+1 234 567 8900"
+                  {...register("phone")}
+                  error={errors.phone?.message}
                 />
               </div>
 
@@ -199,26 +166,23 @@ const SurveyPage = () => {
                   {['Male', 'Female', 'Other'].map((gender) => (
                     <label key={gender} className={`
                                             flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-all
-                                            ${formData.gender === gender
-                        ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100'
-                        : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }
+                                            ${errors.gender 
+                                                ? 'border-red-300 bg-red-50/30 hover:border-red-400'
+                                                : 'bg-white hover:border-gray-400 border-gray-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100'
+                                            }
                                         `}>
                       <input
                         type="radio"
                         name="gender"
                         value={gender}
-                        checked={formData.gender === gender}
-                        onChange={handleChange}
                         className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        {...register("gender")}
                       />
-                      <span className={`text-sm ${formData.gender === gender ? 'font-medium text-indigo-900' : 'text-gray-700'}`}>
-                        {gender}
-                      </span>
+                      <span className="text-sm text-gray-700">{gender}</span>
                     </label>
                   ))}
                 </div>
-                {errors.gender && <div className="text-xs text-red-500 font-medium mt-1">{errors.gender}</div>}
+                {errors.gender && <div className="text-xs text-red-500 font-medium mt-1">{errors.gender.message}</div>}
               </div>
             </div>
 
@@ -232,9 +196,9 @@ const SurveyPage = () => {
               <Input
                 label="Address"
                 name="address"
-                value={formData.address}
-                onChange={handleChange}
                 placeholder="123 Main St, City, Country"
+                {...register("address")}
+                error={errors.address?.message}
               />
 
               <div className="space-y-1.5">
@@ -244,8 +208,6 @@ const SurveyPage = () => {
                 <textarea
                   id="message"
                   name="message"
-                  value={formData.message}
-                  onChange={handleChange}
                   rows={5}
                   className={`
                                         w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200 outline-none resize-y min-h-[120px]
@@ -255,8 +217,9 @@ const SurveyPage = () => {
                     }
                                     `}
                   placeholder="Share your thoughts with us..."
+                  {...register("message")}
                 />
-                {errors.message && <div className="text-xs text-red-500 font-medium">{errors.message}</div>}
+                {errors.message && <div className="text-xs text-red-500 font-medium">{errors.message?.message}</div>}
               </div>
             </div>
 
@@ -264,10 +227,9 @@ const SurveyPage = () => {
             <input
               type="text"
               name="honeypot"
-              value={formData.honeypot}
-              onChange={handleChange}
               className="hidden"
               autoComplete="off"
+              {...register("honeypot")}
             />
 
             <div className="pt-4">
@@ -287,6 +249,11 @@ const SurveyPage = () => {
                 )}
               </Button>
             </div>
+            {errors.apiError && (
+              <div className="text-center text-red-600 font-medium mt-4">
+                {errors.apiError.message}
+              </div>
+            )}
           </form>
         </Card>
       </div>
