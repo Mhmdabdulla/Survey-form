@@ -8,7 +8,7 @@ import { Send, FileText, CheckCircle } from "lucide-react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
+import { schema } from "../schemas/survery-form";
 import {
   CountrySelect,
   StateSelect,
@@ -19,31 +19,7 @@ import "react-country-state-city/dist/react-country-state-city.css";
 const SurveyPage = () => {
   const { addToast } = useToast();
 
-  const schema = z.object({
-    name: z
-      .string()
-      .min(2, "Name must be at least 2 characters")
-      .regex(/^[a-zA-Z\s]+$/, "Name can contain only letters"),
-    gender: z.enum(["Male", "Female", "Other"], {
-      errorMap: () => ({ message: "Gender is required" }),
-    }),
-    nationality: z.string().min(2, "Nationality must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().regex(/^\d{10,15}$/, "Invalid phone number"),
-    country: z.string().min(1, "Country is required"),
-    state: z.string().min(1, "State is required"),
-    city: z.string().min(1, "City is required"),
-    addressLine: z
-      .string()
-      .min(5, "Address Line must be at least 5 characters")
-      .max(500, "Address Line cannot exceed 500 characters"),
-    message: z
-      .string()
-      .max(500, "Message cannot exceed 500 characters")
-      .min(10, "Message must be at least 10 characters")
-      .optional(),
-    honeypot: z.string().optional(),
-  });
+
 
   const {
     register,
@@ -259,13 +235,6 @@ const SurveyPage = () => {
                 Additional Feedback
               </h3>
 
-              {/* <Input
-                label="Address"
-                name="address"
-                placeholder="123 Main St, City, Country"
-                {...register("address")}
-                error={errors.address?.message}
-              /> */}
 
               <Controller
                 name="country"
