@@ -21,7 +21,7 @@ const SurveyPage = () => {
     email: z.string().email("Invalid email address"),
     phone: z.string().regex(/^\d{10,15}$/, "Invalid phone number"),
     address: z.string().max(500, "Address cannot exceed 500 characters"),
-    message: z.string().max(500, "Message cannot exceed 500 characters").optional(),
+    message: z.string().max(500, "Message cannot exceed 500 characters").min(10, "Message must be at least 10 characters").optional(),
     honeypot: z.string().optional()
   });
 
@@ -31,6 +31,7 @@ const SurveyPage = () => {
     setError,
     formState: { errors, isSubmitting },
     reset,
+    watch,
   } = useForm({
     defaultValues: {
     name: '',
@@ -46,6 +47,10 @@ const SurveyPage = () => {
   });
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const maxLength = 500;
+  const messageValue = watch("message", "") || "";
+
+
 
 
 
@@ -219,6 +224,8 @@ const SurveyPage = () => {
                   placeholder="Share your thoughts with us..."
                   {...register("message")}
                 />
+                {/* Live character counter */}
+                <span className={`text-xs mt-1 ${messageValue.length > maxLength ? 'text-red-500' : 'text-gray-500'}`}>{messageValue.length}/{maxLength} characters</span>
                 {errors.message && <div className="text-xs text-red-500 font-medium">{errors.message?.message}</div>}
               </div>
             </div>
