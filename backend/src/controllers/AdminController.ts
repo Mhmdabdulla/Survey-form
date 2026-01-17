@@ -1,16 +1,19 @@
 
 import type { Request, Response, NextFunction } from "express";
-import { AdminService } from "../services/AdminService";
+import { IAdminService } from "../services/interfaces/IAdminService";
 import { CreateAdminDTO, LoginAdminDTO } from "../dto/AdminDTO";
+import { IAdminController } from "./interfaces/IAdminController";
 
-export class AdminController {
-  constructor(private adminService: AdminService) {}
+
+
+export class AdminController implements IAdminController {
+  constructor(private adminService: IAdminService) {}
 
   createAdmin = async (
     req: Request<{}, {}, CreateAdminDTO>,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<Response | void> => {
     try {
       const result = await this.adminService.createAdmin(req.body);
       return res.status(201).json(result);
@@ -34,7 +37,7 @@ export class AdminController {
     req: Request<{}, {}, LoginAdminDTO>,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<Response | void> => {
     try {
       const result = await this.adminService.login(req.body);
       return res.status(200).json(result);
