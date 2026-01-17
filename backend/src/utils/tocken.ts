@@ -2,24 +2,49 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET!;
+
 const TOKEN = process.env.TOKEN_SECRET!;
 
-export const generateAccessToken = (payload: { id: string; name: string }) => {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
-};
 
-export const generateToken = (payload: { id: string; name: string }) => {
+export interface TokenPayload {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export const generateToken = (payload: TokenPayload): string => {
   console.log(
-    "Generating refresh token with payload:",
-    payload, TOKEN
+    "Generating token with payload:",
+    payload,
+    "Secret:",
+    TOKEN ? "present" : "missing"
   );
+  
+  if (!TOKEN) {
+    throw new Error("JWT secret is not defined");
+  }
+  
   return jwt.sign(payload, TOKEN, { expiresIn: "7d" });
 };
 
-export const verifyRefreshToken = (token: string) => {
-  return jwt.verify(token, TOKEN) as {
-    id: string;
-    name: string;
-  };
+export const verifyToken = (token: string): TokenPayload => {
+  if (!TOKEN) {
+    throw new Error("JWT secret is not defined");
+  }
+  
+  try {
+    const decoded = jwt.verify(token, TOKEN) as TokenPayload;
+    return decoded;
+  } catch (error) {
+    throw new Error("Invalid or expired token");
+  }
+};
+
+// Optional: Generate refresh token (longer expiry)
+export const generateRefreshToken = (payload: TokenPayload): string => {
+  if (!TOKEN) {
+    throw new Error("JWT secret is not defined");
+  }
+  
+  return jwt.sign(payload, TOKEN, { expiresIn: "30d" });
 };
