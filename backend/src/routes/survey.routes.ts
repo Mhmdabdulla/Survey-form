@@ -1,16 +1,16 @@
+// src/routes/survey.routes.ts
 import { Router } from "express";
-import {
-  submitSurvey,
-  getAllSurveys
-} from "../controllers/survey.controller";
+import { Container } from "../di/container";
 import { adminAuth } from "../middleware/auth.middleware";
 
 const router = Router();
+const surveyController = Container.getSurveyController();
 
+// Public route - Submit survey
+router.post("/", surveyController.submitSurvey);
 
-router.post("/", submitSurvey);
-
-
-router.get("/", adminAuth, getAllSurveys);
+// Protected routes - Admin only
+router.get("/", adminAuth, surveyController.getAllSurveys);
+router.get("/:id", adminAuth, surveyController.getSurveyById);
 
 export default router;

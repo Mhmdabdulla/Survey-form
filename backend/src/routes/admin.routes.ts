@@ -1,17 +1,12 @@
+// src/routes/admin.routes.ts
 import { Router } from "express";
-import {
-  adminLogin,
-  createAdmin,
-} from "../controllers/admin.controller";
-
+import { Container } from "../di/container";
 
 const router = Router();
+const adminController = Container.getAdminController();
 
-// Admin login
-router.post("/login", adminLogin);
-
-// Create admin
-router.post("/create",  createAdmin);
-// router.post("/refresh", refreshAccessToken);
+// Admin routes
+router.post("/login", adminController.login);
+router.post("/create", adminController.createAdmin);
 
 export default router;
