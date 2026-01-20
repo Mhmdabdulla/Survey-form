@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
@@ -6,7 +7,7 @@ import Button from '../components/ui/Button';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext'; 
 import { adminLogin } from '../services/admin.service';
-import { ShieldCheck, Lock } from 'lucide-react';
+import { ShieldCheck, Lock, Mail } from 'lucide-react';
 
 const AdminLoginPage = () => {
     const [email, setEmail] = useState('');
@@ -25,23 +26,23 @@ const AdminLoginPage = () => {
             return;
         }
 
+        // Basic email validation
+        const emailRegex = /^\S+@\S+\.\S+$/;
+        if (!emailRegex.test(email)) {
+            addToast('Please enter a valid email address', 'error');
+            return;
+        }
+
         setIsLoggingIn(true);
         try {
-  
             const data = await adminLogin(email, password);
             
             login(data.token, data.admin); 
-
             addToast('Welcome back, Admin!', 'success');
-            
-
             navigate('/admin/dashboard');
-            
-
         } catch (err) {
-
             addToast(err.message, 'error'); 
-        console.log("Toast shown with message:", err.message);
+            console.log("Toast shown with message:", err.message);
         } finally {
             setIsLoggingIn(false);
         }
@@ -65,13 +66,14 @@ const AdminLoginPage = () => {
                 <Card className="mt-8 bg-white py-8 px-4 shadow-xl border-0 sm:rounded-2xl sm:px-10">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <Input
-                            label="Username"
-                            type="text"
+                            label="Email Address"
+                            type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="John"
-                            autoComplete="username"
+                            placeholder="admin@example.com"
+                            autoComplete="email"
                             className="bg-gray-50"
+                            icon={<Mail className="h-5 w-5 text-gray-400" />}
                         />
 
                         <Input
