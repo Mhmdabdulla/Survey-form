@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ISurveyService } from "../services/interfaces/ISurveyService";
 import { CreateSurveyDTO, GetSurveysQueryDTO } from "../dto/SurveyDTO";
 import { ISurveyController } from "./interfaces/ISurveyController";
+import { ValidationError } from "../services/SurveyService";
 
 
 
@@ -20,14 +21,11 @@ export class SurveyController implements ISurveyController {
       const result = await this.surveyService.createSurvey(req.body);
       return res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (
-          error.message === "All required fields must be filled" ||
-          error.message === "Invalid email format" ||
-          error.message === "Invalid phone format"
-        ) {
-          return res.status(400).json({ message: error.message });
-        }
+       if (error instanceof ValidationError) {
+        return res.status(400).json({ 
+          message: "Validation failed",
+          errors: error.errors 
+        });
       }
       next(error);
     }

@@ -14,6 +14,14 @@ import { ISurveyRepository } from "../repositories/interfaces/ISurveyRepository"
 import { ISurveyService } from "../services/interfaces/ISurveyService";
 import { ISurveyController } from "../controllers/interfaces/ISurveyController";
 
+import { SurveyValidator } from "../validators/SurveyValidator";
+import { EmailValidator } from "../validators/EmailValidator";
+import { PhoneValidator } from "../validators/PhoneValidator";
+import { RequiredFieldValidator } from "../validators/RequiredFieldValidator";
+import { GenderValidator } from "../validators/GenederValidator";
+
+
+
 export class Container {
   private static instances = new Map();
 
@@ -41,6 +49,42 @@ export class Container {
     return this.instances.get("AdminController");
   }
 
+
+  static getSurveyValidator(): SurveyValidator {
+    if (!this.instances.has("SurveyValidator")) {
+      const validator = new SurveyValidator();
+      
+      // Register all field validators
+      // Name validation
+      validator.registerValidator('name', new RequiredFieldValidator('Name'));
+      
+      // Email validation
+      validator.registerValidator('email', new RequiredFieldValidator('Email'));
+      validator.registerValidator('email', new EmailValidator());
+      
+      // Phone validation
+      validator.registerValidator('phone', new RequiredFieldValidator('Phone'));
+      validator.registerValidator('phone', new PhoneValidator());
+      
+      // Gender validation
+      validator.registerValidator('gender', new RequiredFieldValidator('Gender'));
+      validator.registerValidator('gender', new GenderValidator());
+      
+      // Nationality validation
+      validator.registerValidator('nationality', new RequiredFieldValidator('Nationality'));
+      
+      // Address validation
+      validator.registerValidator('address', new RequiredFieldValidator('Address'));
+      
+      // You can easily add more validators here without modifying existing code
+      // validator.registerValidator('phone', new PhoneFormatValidator('+91'));
+      // validator.registerValidator('email', new EmailDomainValidator(['gmail.com', 'yahoo.com']));
+      
+      this.instances.set("SurveyValidator", validator);
+    }
+    return this.instances.get("SurveyValidator");
+  }
+
   // Survey dependencies
   static getSurveyRepository(): ISurveyRepository {
     if (!this.instances.has("SurveyRepository")) {
@@ -52,7 +96,8 @@ export class Container {
   static getSurveyService(): ISurveyService {
     if (!this.instances.has("SurveyService")) {
       const repository = this.getSurveyRepository();
-      this.instances.set("SurveyService", new SurveyService(repository));
+      const validator = this.getSurveyValidator();
+      this.instances.set("SurveyService", new SurveyService(repository, validator));
     }
     return this.instances.get("SurveyService");
   }
