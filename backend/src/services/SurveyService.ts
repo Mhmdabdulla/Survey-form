@@ -9,40 +9,26 @@ import {
   SurveyDetailDTO
 } from "../dto/SurveyDTO";
 import { ISurveyService } from "./interfaces/ISurveyService";
+import { SurveyValidator } from "../validators/SurveyValidator";
 
 
 
 export class SurveyService implements ISurveyService {
-  constructor(private surveyRepository: ISurveyRepository) {}
+  constructor(private surveyRepository: ISurveyRepository,
+              private validator: SurveyValidator,
+  ) {}
 
-  async createSurvey(dto: CreateSurveyDTO): Promise<CreateSurveyResponseDTO> {
-    // Validate required fields
-    if (!dto.name || !dto.gender || !dto.nationality || !dto.email || !dto.phone || !dto.address) {
-      throw new Error("All required fields must be filled");
+  async createSurvey(data: CreateSurveyDTO): Promise<CreateSurveyResponseDTO> {
+    // Validate using extensible validator
+    const validationResult = this.validator.validate(data);
+    
+    if (!validationResult.isValid) {
+      throw new ValidationError(validationResult.errors);
     }
 
-    // Validate email format
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(dto.email)) {
-      throw new Error("Invalid email format");
-    }
-
-    // Validate phone format (basic validation)
-    const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-    if (!phoneRegex.test(dto.phone)) {
-      throw new Error("Invalid phone format");
-    }
 
     // Create survey
-    const survey = await this.surveyRepository.create({
-      name: dto.name.trim(),
-      gender: dto.gender,
-      nationality: dto.nationality,
-      email: dto.email.toLowerCase().trim(),
-      phone: dto.phone.trim(),
-      address: dto.address.trim(),
-      message: dto.message?.trim()
-    });
+    const survey = await this.surveyRepository.create(data);
 
     return {
       message: "Survey submitted successfully",
@@ -109,5 +95,13 @@ export class SurveyService implements ISurveyService {
       createdAt: survey.createdAt.toISOString(),
       updatedAt: survey.updatedAt.toISOString()
     };
+  }
+}
+
+// Custom error class
+export class ValidationError extends Error {
+  constructor(public errors: Record<string, string>) {
+    super("Validation failed");
+    this.name = "ValidationError";
   }
 }
